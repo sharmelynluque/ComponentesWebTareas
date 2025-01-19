@@ -1,0 +1,40 @@
+<div class="task_creation" id="task_modal">
+  <h1>Creación de nueva tarea</h1>
+
+  <form class="form" id="form_create">
+    <div class="form_group">
+      <label for="task_title">Escribir título de la tarea</label>
+      <input
+        type="text"
+        id="task-title"
+        name="titulo"
+        placeholder="Escribir título de la tarea"
+        required
+      />
+    </div>
+
+    <div class="form_group">
+      <label for="task_desc">Escribir descripción de la tarea</label>
+      <textarea
+        id="task-desc"
+        name="descripcion"
+        placeholder="Escribir descripción de la tarea"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form_group status">
+      <label for="task_status">Estado de la tarea</label>
+      <span id="task-status" class="status_badge">Pendiente</span>
+    </div>
+
+    <div class="form_actions">
+      <button type="button" class="btn btn_cancel" id="btn_cancel">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn_create" id="btn_create">
+        Crear tarea
+      </button>
+    </div>
+  </form>
+</div>
