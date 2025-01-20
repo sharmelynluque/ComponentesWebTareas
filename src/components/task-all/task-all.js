@@ -21,10 +21,10 @@ class TaskAll extends HTMLElement {
             display:flex;
             align-items:center;
             gap: 10px;
+            cursor:pointer;
 
         }
         .all_header .icon{
-            cursor:pointer;
             width:30px;
             height:30px;
             background:var(--text-light);
@@ -39,7 +39,17 @@ class TaskAll extends HTMLElement {
     this.render();
   }
 
-  render() {}
+  render() {
+    const selectAllButton = this.shadowRoot.querySelector("#select_all");
+
+    selectAllButton.addEventListener("click", () => {
+      const selectAllEvent = new CustomEvent("select-all", {
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(selectAllEvent);
+    });
+  }
 }
 
 customElements.define("task-all", TaskAll);

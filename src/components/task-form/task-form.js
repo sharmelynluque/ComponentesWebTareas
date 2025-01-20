@@ -112,11 +112,22 @@ class TaskForm extends HTMLElement {
     this.shadowRoot.appendChild(style);
     this.create = this.create.bind(this);
     this.close = this.close.bind(this);
+    this.id = "";
+    this.mode = "create";
   }
 
   connectedCallback() {
     document.addEventListener("toggle-modal", () => {
       const modal = this.shadowRoot.querySelector("#task_modal");
+      const title = this.shadowRoot.querySelector("#task-title");
+      const desc = this.shadowRoot.querySelector("#task-desc");
+      const btn = this.shadowRoot.querySelector(".btn_create");
+
+      title.value = "";
+      desc.value = "";
+      this.id = "";
+      btn.textContent = "Crear tarea";
+      this.mode = "create";
       modal.style.display = "block";
     });
     this.render();
@@ -125,13 +136,23 @@ class TaskForm extends HTMLElement {
   render() {
     const cancelBtn = this.shadowRoot.querySelector("#btn_cancel");
     const formCreate = this.shadowRoot.querySelector("#form_create");
+    const editModal = this.shadowRoot.querySelector("#task_modal");
 
     formCreate.addEventListener("submit", this.create);
     cancelBtn.addEventListener("click", () => this.close());
 
     document.addEventListener("open-edit", (event) => {
       const { id, titulo, descripcion } = event.detail;
-      const editModal = this.shadowRoot.querySelector("#task_modal");
+      const title = this.shadowRoot.querySelector("#task-title");
+      const desc = this.shadowRoot.querySelector("#task-desc");
+      const btn = this.shadowRoot.querySelector(".btn_create");
+
+      title.value = titulo;
+      desc.value = descripcion;
+      this.id = id;
+      btn.textContent = "Editar";
+      this.mode = "edit";
+      editModal.style.display = "block";
     });
   }
 
@@ -142,30 +163,51 @@ class TaskForm extends HTMLElement {
     const titulo = formData.get("titulo");
     const descripcion = formData.get("descripcion");
 
-    console.log({ titulo, descripcion });
     const notas = JSON.parse(localStorage.getItem("notas")) || [];
 
-    const newNote = {
-      id: Date.now(),
-      titulo,
-      descripcion,
-      completada: false,
-    };
+    if (this.mode === "create") {
+      const newNote = {
+        id: Date.now(),
+        titulo,
+        descripcion,
+        completada: false,
+      };
 
-    notas.push(newNote);
+      notas.push(newNote);
 
-    localStorage.setItem("notas", JSON.stringify(notas));
-    const createEvent = new CustomEvent("create-task", {
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(createEvent);
+      localStorage.setItem("notas", JSON.stringify(notas));
+      const createEvent = new CustomEvent("create-task", {
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(createEvent);
 
-    const toastEvent = new CustomEvent("open-toast", {
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(toastEvent);
+      const toastEvent = new CustomEvent("open-toast", {
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(toastEvent);
+    } else if (this.mode === "edit") {
+      const id = parseInt(this.getAttribute("id"));
+
+      const index = notas.findIndex((nota) => nota.id === id);
+      if (index !== -1) {
+        notas[index].titulo = titulo;
+        notas[index].descripcion = descripcion;
+
+        localStorage.setItem("notas", JSON.stringify(notas));
+
+        const updateEvent = new CustomEvent("create-task", {
+          bubbles: true,
+          composed: true,
+        });
+        this.dispatchEvent(updateEvent);
+
+        console.log(`Nota con ID ${id} actualizada.`);
+      } else {
+        console.error(`Nota con ID ${id} no encontrada.`);
+      }
+    }
 
     this.close();
   }

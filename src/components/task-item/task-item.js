@@ -89,6 +89,7 @@ class TaskItem extends HTMLElement {
     this.shadowRoot.querySelector("#task_description").textContent =
       descripcion;
     let status_box = this.shadowRoot.querySelector(".status");
+    const checkbox = this.shadowRoot.querySelector("#complete");
 
     if (status === "true") {
       status_box.textContent = "Marcar como pendiente";
@@ -122,10 +123,32 @@ class TaskItem extends HTMLElement {
       }
     });
 
-    document.addEventListener("edit", this.openModalEditar);
-  }
+    document.addEventListener("select-all", () => {
+      checkbox.checked = true;
+      const selectEvent = new CustomEvent("task-selected", {
+        detail: {
+          id: this.getAttribute("id"),
+          selected: checkbox.checked,
+        },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(selectEvent);
+    });
 
-  markCompleted() {}
+    checkbox.addEventListener("change", () => {
+      const selectEvent = new CustomEvent("task-selected", {
+        detail: {
+          id: this.getAttribute("id"),
+          selected: checkbox.checked,
+        },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(selectEvent);
+    });
+    task.addEventListener("edit", this.openModalEditar);
+  }
 
   openModal() {
     const deleteEvent = new CustomEvent("open-delete-task", {
@@ -146,7 +169,6 @@ class TaskItem extends HTMLElement {
       bubbles: true,
       composed: true,
     });
-    console.log("openedit");
     this.dispatchEvent(editEvent);
   }
 }

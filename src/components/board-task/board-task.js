@@ -54,7 +54,6 @@ class BoardTask extends HTMLElement {
 
     boardContainer.addEventListener("delete-task", (event) => {
       const taskId = event.detail.id;
-      console.log(taskId);
       let notas = JSON.parse(localStorage.getItem("notas")) || [];
       notas = notas.filter((nota) => nota.id !== parseInt(taskId));
       localStorage.setItem("notas", JSON.stringify(notas));
@@ -64,11 +63,32 @@ class BoardTask extends HTMLElement {
     boardContainer.addEventListener("create-task", () => {
       this.renderTasks();
     });
-  }
-  renderTasks() {
-    const tasksContainer = this.shadowRoot.querySelector("#tasks_container");
-    const notas = JSON.parse(localStorage.getItem("notas")) || [];
 
+    boardContainer.addEventListener("render-task", () => {
+      this.renderTasks();
+    });
+
+    document.addEventListener("filter-changed", (event) => {
+      const { complete, pending } = event.detail;
+      const tareas = JSON.parse(localStorage.getItem("notas")) || [];
+
+      const tareasFiltradas = tareas.filter((tarea) => {
+        if (complete && tarea.completada) return true;
+        if (pending && !tarea.completada) return true;
+        return false;
+      });
+
+      this.renderTasks(tareasFiltradas);
+    });
+  }
+
+  renderTasks(tareasFiltradas = null) {
+    const tasksContainer = this.shadowRoot.querySelector("#tasks_container");
+    let notas = JSON.parse(localStorage.getItem("notas")) || [];
+
+    if (tareasFiltradas) {
+      notas = tareasFiltradas;
+    }
     tasksContainer.innerHTML = "";
     notas.map((nota) => {
       const taskElement = document.createElement("task-item");

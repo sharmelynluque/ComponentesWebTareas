@@ -1,11 +1,11 @@
-import templateHTML from './task-filter.html';
+import templateHTML from "./task-filter.html";
 
 class TaskFilter extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = templateHTML;
-    const style = document.createElement('style');
+    const style = document.createElement("style");
 
     style.textContent = `
 
@@ -13,6 +13,7 @@ class TaskFilter extends HTMLElement {
             color:var(--text-light);
             font-size:var(--font-size-m);
             font-weight: bold;
+            cursor:pointer;
         }
         .filter_option{
             background-color: var(--secondary-color);
@@ -28,17 +29,14 @@ class TaskFilter extends HTMLElement {
             position:absolute;
           }
           
-          .filter_header img{
-              cursor: pointer;
-          }
           .filter_option input{
               cursor: pointer;
-
           }
  
         `;
     this.shadowRoot.appendChild(style);
-
+    this.completeCheckbox = this.shadowRoot.querySelector("#complete");
+    this.pendingCheckbox = this.shadowRoot.querySelector("#pending");
   }
 
   connectedCallback() {
@@ -46,16 +44,30 @@ class TaskFilter extends HTMLElement {
   }
 
   render() {
-    // Manejo de eventos
-    const filterHeader = this.shadowRoot.querySelector('.filter_header');
-    const filterOption = this.shadowRoot.querySelector('.filter_option');
+    const filterHeader = this.shadowRoot.querySelector(".filter_header");
+    const filterOption = this.shadowRoot.querySelector(".filter_option");
 
-    filterHeader.addEventListener('click', () => {
-      filterOption.style.display = filterOption.style.display === 'none' ? 'block' : 'none';
+    filterHeader.addEventListener("click", () => {
+      filterOption.style.display =
+        filterOption.style.display !== "block" ? "block" : "none";
     });
+
+    this.completeCheckbox.addEventListener("change", () => this.filter());
+    this.pendingCheckbox.addEventListener("change", () => this.filter());
   }
 
+  filter() {
+    const complete = this.completeCheckbox.checked;
+    const pending = this.pendingCheckbox.checked;
 
+    const filterEvent = new CustomEvent("filter-changed", {
+      detail: { complete, pending },
+      bubbles: true,
+      composed: true,
+    });
+
+    this.dispatchEvent(filterEvent);
+  }
 }
 
-customElements.define('task-filter', TaskFilter);
+customElements.define("task-filter", TaskFilter);
